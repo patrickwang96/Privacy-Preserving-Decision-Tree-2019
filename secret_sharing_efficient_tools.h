@@ -20,6 +20,9 @@ void ss_decrypt_server_batch(int plain[], int share[], int m, NetAdapter *net);
 
 void ss_decrypt_server_batch(uint64_t plain[], uint64_t share[], int m, NetAdapter *net);
 
+void ss_decrypt_server(matrix_z &plain, const matrix_z share, NetAdapter *net);
+void ss_decrypt_client(matrix_z &plain, const matrix_z share, NetAdapter *net);
+
 void ss_decrypt_server_batch_compressed(int plain[], int share[], int m, NetAdapter *net);
 
 void secure_mul_server(int as, int bs, int &ab_s, const triplet_b &tri, NetAdapter *net);

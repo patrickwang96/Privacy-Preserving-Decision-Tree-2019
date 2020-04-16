@@ -33,6 +33,51 @@ void ss_decrypt_server_batch(uint64_t plain[], uint64_t share[], int m, NetAdapt
     delete[] recv_share;
 }
 
+
+void ss_decrypt_server(matrix_z &plain, const matrix_z share, NetAdapter *net) {
+    int rows = share.rows();
+    int cols = share.cols();
+
+    uint64_t *buffer = new uint64_t[rows * cols];
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            buffer[i * cols + j] = mpz_to_u64(share(i, j));
+        }
+    }
+    uint64_t *result = new uint64_t[rows * cols];
+
+    ss_decrypt_server_batch(result, buffer, rows * cols, net);
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            plain(i, j) = (long) result[i * cols + j];
+        }
+    }
+    delete[] result;
+    delete[] buffer;
+}
+
+void ss_decrypt_client(matrix_z &plain, const matrix_z share, NetAdapter *net) {
+    int rows = share.rows();
+    int cols = share.cols();
+
+    uint64_t *buffer = new uint64_t[rows * cols];
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            buffer[i * cols + j] = mpz_to_u64(share(i, j));
+        }
+    }
+    uint64_t *result = new uint64_t[rows * cols];
+
+    ss_decrypt_client_batch(result, buffer, rows * cols, net);
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            plain(i, j) = (long) result[i * cols + j];
+        }
+    }
+    delete[] result;
+    delete[] buffer;
+}
+
 void ss_decrypt_server_batch_compressed(int plain[], int share[], int m, NetAdapter *net) {
     int *recv_share = new int[m];
     int n;
@@ -194,7 +239,6 @@ secure_feature_index_sharing_client(uint64_t index, uint64_t s, std::vector<uint
     send_u64_net(i_origin_with_mask, net);
 
 }
-
 
 
 void ss_decrypt_client(int &plain, int share, NetAdapter *net) {

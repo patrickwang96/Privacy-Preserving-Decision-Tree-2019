@@ -21,4 +21,10 @@ void mod_2exp(mpz_class &x, int n);
 
 void mod_2exp(matrix_z &mat, int n);
 
+inline int extract_bit(mpz_class n, int k)
+{
+    return n.get_ui() >> k & 1;
+}
+
+//inline int extract_bit(int)
 #endif

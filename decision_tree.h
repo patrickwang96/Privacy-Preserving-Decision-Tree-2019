@@ -25,7 +25,7 @@ void secure_class_generation_polynomial(mpz_class (*edges)[2], mpz_class (*leaf_
 inline void get_mpz_net(mpz_class &m, NetAdapter *net) {
     static uint64_t i;
     net->recv(reinterpret_cast<unsigned char *>(&(i)), sizeof(i));
-    m = i;
+    m =(long) i;
 }
 
 inline void send_mpz_net(const mpz_class m, NetAdapter *net) {
