@@ -8,8 +8,14 @@ include_directories(/usr/local/include/eigen3/ /usr/local/include/ ../libOTe/ ..
 link_directories(/usr/local/lib/ ../libOTe/lib/ ../libOTe/cryptoTools/thirdparty/linux/boost/stage/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "./build")
 
-set(COMMON_SRCS types.cc types.h config.cc config.h secret_sharing.cc secret_sharing.h utils.cc utils.h test_driver.cc test_driver.h decision_tree.cc decision_tree.h)
+set(COMMON_SRCS types.cc types.h config.cc config.h secret_sharing.cc secret_sharing.h utils.cc utils.h  decision_tree.cc decision_tree.h)
+set(CLIENT_SRCS test_cloud_client.cpp test_cloud_client.h client_main.cpp)
+set(SERVER_SRCS test_cloud_server.cpp test_cloud_server.h server_main.cpp)
+set(MAIN_SRCS test_driver.h test_driver.cc main.cc)
+set(NET_SRCS network.cc network.h secret_sharing_efficient_tools.h secret_sharing_efficient_tools.cpp bit_compression.cpp)
 
 
-add_executable(main ${COMMON_SRCS} main.cc)
+add_executable(main ${COMMON_SRCS} ${MAIN_SRCS})
+add_executable(client ${COMMON_SRCS} ${CLIENT_SRCS} ${NET_SRCS})
+add_executable(server ${COMMON_SRCS} ${SERVER_SRCS} ${NET_SRCS})
 target_link_libraries(main gmp gmpxx)
