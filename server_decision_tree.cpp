@@ -66,7 +66,7 @@ void server_secure_node_evaluation(std::vector<mpz_class> &x, std::vector<mpz_cl
 
     // 4)
     auto d = new int[m * CONFIG_L];
-    secure_mul_server_batch_compressed(p, q, d, m, tri_b, net);
+    secure_mul_server_batch_compressed(p, q, d, m * CONFIG_L, tri_b, net);
     for (int i = 0; i < m * CONFIG_L; i++) d[i] ^= 1;
 
     auto e = new int[m * CONFIG_L];
@@ -132,21 +132,53 @@ void server_secure_class_generation_path_cost(const std::vector<mpz_class> &edge
     for (int i = 0; i < num_leaf; ++i, ++id)
         path_cost[i] = interm_rlt[(id - 1) / 2] + edges[id];
 
+}
+
+void fig6(std::vector<mpz_class> &leaf_value, std::vector<mpz_class> &path_cost, int depth, NetAdapter *net) {
+    int num_leaf = pow(2, depth);
+
+    auto r = new uint64_t[num_leaf * 3];
+    auto r_prime = r + num_leaf;
+    std::vector<uint64_t> mapping(num_leaf);
+
+
+    for (int i = 0; i < num_leaf; i++) {
+        r_prime[i] = mpz_to_u64(gmp_prn.get_z_range(CONFIG_P));
+        r[i] = mpz_to_u64(gmp_prn.get_z_range(CONFIG_P));
+        mapping[i] = i;
+    }
+
+    std::random_shuffle(mapping.begin(), mapping.end());
+
+    memcpy(r + num_leaf * 2, mapping.data(), sizeof(uint64_t) * num_leaf);
+
+    // send r, r_prime to client
+    net->send(reinterpret_cast<unsigned char *>(r), sizeof(uint64_t) * 3 * num_leaf);
+
+
     /* masking */
     for (int i = 0; i < num_leaf; ++i) {
-        leaf_value[i] += gmp_prn.get_z_range(CONFIG_P) * path_cost[i];
+        leaf_value[i] += (long) r_prime[i] * path_cost[i];
         mod_prime(leaf_value[i], CONFIG_P);
 
-        path_cost[i] *= gmp_prn.get_z_range(CONFIG_P);
+        path_cost[i] *= (long) r[i];
         mod_prime(path_cost[i], CONFIG_P);
     }
 
     // permutation
-    std::random_shuffle(path_cost.begin(), path_cost.end());
-    std::random_shuffle(leaf_value.begin(), leaf_value.end());
+    std::vector<mpz_class> leaf_value_prime(num_leaf);
+    std::vector<mpz_class> path_cost_prime(num_leaf);
 
+    for (int i = 0; i < num_leaf; i++) {
+        leaf_value_prime[i] = leaf_value[mapping[i]];
+        path_cost_prime[i] = path_cost_prime[mapping[i]];
+    }
+    path_cost = path_cost_prime;
+    leaf_value = leaf_value_prime;
 
+    delete[] r;
 }
+
 
 void
 server_secure_class_generation_polynomial(std::vector<mpz_class> &edges, std::vector<mpz_class> &leaf_value,

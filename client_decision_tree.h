@@ -27,6 +27,8 @@ void client_secure_class_generation_path_cost(const std::vector<mpz_class> &edge
                                               std::vector<mpz_class> &interm_rlt, std::vector<mpz_class> &path_cost,
                                               int depth, NetAdapter *net);
 
+void fig6(std::vector<mpz_class> &leaf_value, std::vector<mpz_class> &path_cost, int depth, NetAdapter *net);
+
 void
 client_secure_class_generation_polynomial(std::vector<mpz_class> &edges, std::vector<mpz_class> &leaf_value,
                                           std::vector<mpz_class> &interm_rlt,

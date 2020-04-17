@@ -42,6 +42,7 @@ void test_by_phases(std::vector<int> phases, int num_trial) {
     net->close();
 }
 
+
 void phase1(int num_trial, NetAdapter *net) {
     // node selection
     int n, m;
@@ -65,6 +66,9 @@ void phase1(int num_trial, NetAdapter *net) {
         ss_tuple_mz xsigma(m, 1);
 
         double time_total = 0;
+        uint64_t s_bytes = net->get_send_bytes();
+        uint64_t r_bytes = net->get_rev_bytes();
+
         for (int j = 0; j < num_trial; ++j) {
             CLOCK_START
             server_secure_multiplication(sel_mat.share[1], feature.share[1],
@@ -77,9 +81,14 @@ void phase1(int num_trial, NetAdapter *net) {
 
             cache_flusher();
         }
+        s_bytes = net->get_send_bytes() - s_bytes;
+        r_bytes = net->get_rev_bytes() - r_bytes;
 
-        printf("secure node selection (n=%d, d=%d, m=%d): %f ns\n", n, param_nd[i][1], m,
-               time_total / num_trial / 2); // count only one party
+        double send_mb = 1.0 * s_bytes / num_trial / 1024 / 1024, recv_mb = 1.0 * r_bytes / num_trial / 1024 / 1024;
+
+
+        printf("secure node selection (n=%d, d=%d, m=%d): %f ns, bytes: %f\n", n, param_nd[i][1], m,
+               time_total / num_trial / 2, send_mb + recv_mb); // count only one party
     }
 }
 
@@ -106,6 +115,9 @@ void phase2(int num_trial, NetAdapter *net) {
             y[i] = gmp_prn.get_z_bits(CONFIG_L);
         }
 
+        uint64_t s_bytes = net->get_send_bytes();
+        uint64_t r_bytes = net->get_rev_bytes();
+
         double time_total = 0;
         for (int j = 0; j < num_trial; ++j) {
             CLOCK_START
@@ -116,9 +128,13 @@ void phase2(int num_trial, NetAdapter *net) {
 
             cache_flusher();
         }
+        s_bytes = net->get_send_bytes() - s_bytes;
+        r_bytes = net->get_rev_bytes() - r_bytes;
 
-        printf("secure node evaluation (n=%d, d=%d, m=%d): %f ns\n", n, param_nd[i][1], m,
-               time_total / num_trial / 2); // count only one party
+        double send_mb = 1.0 * s_bytes / num_trial / 1024 / 1024, recv_mb = 1.0 * r_bytes / num_trial / 1024 / 1024;
+
+        printf("secure node evaluation (n=%d, d=%d, m=%d): %f ns, bytes: %f\n", n, param_nd[i][1], m,
+               time_total / num_trial / 2, send_mb + recv_mb); // count only one party
 
     }
 
@@ -140,6 +156,8 @@ void phase3(int num_trial, NetAdapter *net) {
         for (int j = 0; j < num_leaf; ++j)
             leaf_value[j] = gmp_prn.get_z_range(CONFIG_P);
 
+        uint64_t s_bytes = net->get_send_bytes();
+        uint64_t r_bytes = net->get_rev_bytes();
         double time_total = 0;
         for (int j = 0; j < num_trial; ++j) {
             CLOCK_START
@@ -149,9 +167,13 @@ void phase3(int num_trial, NetAdapter *net) {
 
             cache_flusher();
         }
+        s_bytes = net->get_send_bytes() - s_bytes;
+        r_bytes = net->get_rev_bytes() - r_bytes;
 
-        printf("secure class generation via path cost (n=%d, d=%d): %f ns\n", n, d,
-               time_total / num_trial); // one party
+        double send_mb = 1.0 * s_bytes / num_trial / 1024 / 1024, recv_mb = 1.0 * r_bytes / num_trial / 1024 / 1024;
+
+        printf("fig5 (n=%d, d=%d): %f ns, bytes: %f\n", n, d,
+               time_total / num_trial, send_mb + recv_mb); // one party
     }
 }
 
@@ -163,31 +185,33 @@ void phase4(int num_trial, NetAdapter *net) {
         d = param_nd[i][1];
         int num_edge = pow(2, d + 1) - 1, num_leaf = pow(2, d);
 
-        std::vector<mpz_class> edges(num_edge);
         std::vector<mpz_class> leaf_value(num_leaf);
-        std::vector<mpz_class> interm_rlt(num_leaf -1, 0);
-        std::vector<mpz_class> path_mul(num_leaf, 0);
-
-        for (int j = 0; j < num_edge; ++j) {
-            edges[i] = gmp_prn.get_z_bits(CONFIG_L);
-        }
+        std::vector<mpz_class> path_cost(num_leaf);
 
         for (int j = 0; j < num_leaf; ++j) {
             leaf_value[i] = gmp_prn.get_z_bits(CONFIG_L);
+            path_cost[i] = gmp_prn.get_z_bits(CONFIG_L);
         }
 
-        triplet_b tri;
 
+        uint64_t s_bytes = net->get_send_bytes();
+        uint64_t r_bytes = net->get_rev_bytes();
         double time_total = 0;
         for (int j = 0; j < num_trial; ++j) {
             CLOCK_START
-            server_secure_class_generation_polynomial(edges, leaf_value, interm_rlt, path_mul, tri, d, net);
+
+            fig6(leaf_value, path_cost, d, net);
             CLOCK_END
             time_total += ELAPSED;
 
             cache_flusher();
         }
+        s_bytes = net->get_send_bytes() - s_bytes;
+        r_bytes = net->get_rev_bytes() - r_bytes;
 
-        printf("secure class generation via polynomial (n=%d, d=%d): %f ns\n", n, d, time_total / num_trial / 2);
+        double send_mb = 1.0 * s_bytes / num_trial / 1024 / 1024, recv_mb = 1.0 * r_bytes / num_trial / 1024 / 1024;
+
+        printf("fig6 (n=%d, d=%d): %f ns, bytes: %f\n", n, d,
+               time_total / num_trial / 2, send_mb + recv_mb);
     }
 }
