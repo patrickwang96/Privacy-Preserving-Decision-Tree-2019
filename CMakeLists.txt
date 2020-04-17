@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.10)
 project(Privacy_Preserving_Decision_Tree_2019)
 
 set(CMAKE_CXX_STANDARD 11)
 
 find_library(gmp required)
-include_directories(/usr/local/include/eigen3/ /usr/local/include/ ../libOTe/ ../libOTe/cryptoTools ../libOTe/cryptoTools/thirdparty/linux/boost ../libOTe/cryptoTools/thirdparty/linux/miracl)
+include_directories(/usr/include/eigen3/ /usr/include/ /usr/local/include/ ../libOTe/ ../libOTe/cryptoTools ../libOTe/cryptoTools/thirdparty/linux/boost ../libOTe/cryptoTools/thirdparty/linux/miracl)
 link_directories(/usr/local/lib/ ../libOTe/lib/ ../libOTe/cryptoTools/thirdparty/linux/boost/stage/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "./build")
 
