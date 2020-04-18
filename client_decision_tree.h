@@ -23,6 +23,8 @@ void client_secure_node_evaluation(std::vector<mpz_class> &x, std::vector<mpz_cl
                                    const triplet_b &tri_b,
                                    NetAdapter *net);
 
+void client_node_eval_phase2(std::vector<int> &a_2, std::vector<mpz_class> &result, const triplet_b &tri_b, NetAdapter *net);
+
 void client_secure_class_generation_path_cost(const std::vector<mpz_class> &edges, std::vector<mpz_class> &leaf_value,
                                               std::vector<mpz_class> &interm_rlt, std::vector<mpz_class> &path_cost,
                                               int depth, NetAdapter *net);

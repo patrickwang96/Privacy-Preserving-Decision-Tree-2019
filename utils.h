@@ -21,10 +21,14 @@ void mod_2exp(mpz_class &x, int n);
 
 void mod_2exp(matrix_z &mat, int n);
 
-inline int extract_bit(mpz_class n, int k)
-{
+inline int extract_bit(mpz_class n, int k) {
     return n.get_ui() >> k & 1;
 }
 
+const int param_nd[5][2] = {{13, 3},
+                            {15, 4},
+                            {9,  8},
+                            {13, 13},
+                            {57, 17}};
 //inline int extract_bit(int)
 #endif

@@ -90,6 +90,14 @@ void server_secure_node_evaluation(std::vector<mpz_class> &x, std::vector<mpz_cl
     delete[] d;
     delete[] e;
 
+
+    delete[] a_2; // this is the result;
+}
+
+
+
+void server_node_eval_phase2(std::vector<int> &a_2, std::vector<mpz_class> &result, const triplet_b &tri_b, NetAdapter *net){
+    int m = a_2.size();
     // 6)
 //    std::vector<mpz_class> t1(m, 0);
 //    std::vector<mpz_class> t2(m);
@@ -116,6 +124,7 @@ void server_secure_node_evaluation(std::vector<mpz_class> &x, std::vector<mpz_cl
     delete[] product;
     delete[] result_a; // this is the result;
 }
+
 
 void server_secure_class_generation_path_cost(const std::vector<mpz_class> &edges, std::vector<mpz_class> &leaf_value,
                                               std::vector<mpz_class> &interm_rlt, std::vector<mpz_class> &path_cost,

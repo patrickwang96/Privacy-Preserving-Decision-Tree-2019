@@ -14,12 +14,6 @@
 
 extern gmp_randclass gmp_prn;
 
-const int param_nd[5][2] = {{9,  8},
-                            {13, 3},
-                            {13, 13},
-                            {15, 4},
-                            {57, 17}};
-
 auto start = std::chrono::steady_clock::now(), end = std::chrono::steady_clock::now();
 #define CLOCK_START {start = std::chrono::steady_clock::now();}
 #define CLOCK_END {end = std::chrono::steady_clock::now();}
@@ -33,8 +27,10 @@ void test_by_phases(std::vector<int> phases, int num_trial) {
         } else if (phase == 2) {
             phase2(num_trial, net);
         } else if (phase == 3) {
-            phase3(num_trial, net);
+            phase25(num_trial, net);
         } else if (phase == 4) {
+            phase3(num_trial, net);
+        } else if (phase == 5) {
             phase4(num_trial, net);
         } else {
             std::cout << "Phase No. out of range." << std::endl;
@@ -140,6 +136,52 @@ void phase2(int num_trial, NetAdapter *net) {
 
 
 }
+
+
+void phase25(int num_trial, NetAdapter *net) {
+    // node evaluation
+    int n, m;
+// secure node evaluation
+    triplet_b tri_b;
+    triplet_z tri_z;
+    for (int i = 0; i < 5; ++i) {
+        n = param_nd[i][0];
+        m = pow(2, param_nd[i][1]) - 1;
+
+        // ugly staff for preparation
+        std::vector<int> a(m);
+        std::vector<mpz_class> result(m);
+        for (int j = 0; j < m; j++) {
+            result[i] = gmp_prn.get_z_bits(1);
+            a[i] = result[i].get_ui();
+            result[i] = gmp_prn.get_z_bits(CONFIG_L);
+        }
+
+        uint64_t s_bytes = net->get_send_bytes();
+        uint64_t r_bytes = net->get_rev_bytes();
+
+        double time_total = 0;
+        for (int j = 0; j < num_trial; ++j) {
+            CLOCK_START
+//            for (int k = 0; k < m; ++k)
+            client_node_eval_phase2(a, result, tri_b, net);
+            CLOCK_END
+            time_total += ELAPSED;
+
+            cache_flusher();
+        }
+        s_bytes = net->get_send_bytes() - s_bytes;
+        r_bytes = net->get_rev_bytes() - r_bytes;
+
+        double send_mb = 1.0 * s_bytes / num_trial / 1024 / 1024, recv_mb = 1.0 * r_bytes / num_trial / 1024 / 1024;
+
+        printf("secure node evaluation phase 2 (n=%d, d=%d, m=%d): %f ns, bytes: %f\n", n, param_nd[i][1], m,
+               time_total / num_trial / 2, send_mb + recv_mb); // count only one party
+
+    }
+
+}
+
 
 void phase3(int num_trial, NetAdapter *net) {
     // secure class generation via path cost

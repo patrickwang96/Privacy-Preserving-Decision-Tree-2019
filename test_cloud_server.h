@@ -14,6 +14,8 @@ void phase1(int num_trial, NetAdapter *net);
 
 void phase2(int num_trial, NetAdapter *net);
 
+void phase25(int num_trial, NetAdapter *net);
+
 void phase3(int num_trial, NetAdapter *net);
 
 void phase4(int num_trial, NetAdapter *net);
